@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candidate Ranking & Analysis | AI Resume Screener</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    /* === Root Theme Variables === */
+    :root {
+      --primary: #00b4d8;
+      --secondary: #0077b6;
+      --dark-bg: rgba(0, 35, 65, 0.95);
+      --panel-bg: rgba(255, 255, 255, 0.12);
+      --hover-bg: rgba(255, 255, 255, 0.18);
+      --text-light: rgba(255, 255, 255, 0.95);
+      --muted: rgba(255, 255, 255, 0.7);
+      --success: #34c759;
+      --warning: #ff9500;
+      --danger: #ff3b30;
+    }
+
+    body {
+      font-family: "Poppins", "Segoe UI", sans-serif;
+      background: linear-gradient(115deg, rgba(0, 35, 65, 0.95), rgba(0, 90, 115, 0.9)),
+        url('https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1920&q=80')
+        no-repeat center center/cover;
+      color: var(--text-light);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 50px 20px;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .page-header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .page-header p {
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    /* --- Panels --- */
+    .panel {
+      background: var(--panel-bg);
+      border-radius: 18px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      padding: 25px;
+      color: #fff;
+    }
+
+    /* --- Left Ranking Section --- */
+    .ranking-panel {
+      padding: 20px;
+    }
+
+    .candidate-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+    }
+
+    .candidate-card:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .candidate-card.active {
+      background: linear-gradient(135deg, rgba(0, 180, 216, 0.3), rgba(0, 119, 182, 0.4));
+      border: 1px solid rgba(0, 180, 216, 0.5);
+      box-shadow: 0 0 12px rgba(0, 180, 216, 0.4);
+    }
+
+    .candidate-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .candidate-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .candidate-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .candidate-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .candidate-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #fff;
+      margin: 0;
+    }
+
+    .candidate-rank {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .score-badge {
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #fff;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .score-high { background: var(--success); }
+    .score-medium { background: var(--warning); }
+    .score-low { background: var(--danger); }
+
+    /* --- Candidate Detail --- */
+    .candidate-detail h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .resume-preview {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      margin-top: 20px;
+      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+
+    .resume-preview iframe {
+      width: 100%;
+      height: 350px;
+      border: none;
+      border-radius: 10px;
+    }
+
+    .metric-section {
+      margin-top: 30px;
+    }
+
+    .metric-title {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .progress {
+      height: 8px;
+      border-radius: 5px;
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .progress-bar {
+      border-radius: 5px;
+      transition: width 0.5s ease;
+    }
+
+    /* --- Print Button --- */
+    .btn-print {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 1rem;
+      margin-top: 25px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .btn-print:hover {
+      background: rgba(0, 180, 216, 0.3);
+      border-color: rgba(0, 180, 216, 0.5);
+      box-shadow: 0 0 25px rgba(0, 180, 216, 0.5);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 992px) {
+      .panel { margin-bottom: 30px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>Candidate Shortlist & Analysis</h1>
+      <p>Click a candidate to view detailed analysis and resume preview</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Left: Candidate Ranking -->
+      <div class="col-lg-4">
+        <div class="panel ranking-panel">
+          <h4 class="mb-3"><i class="fa-solid fa-ranking-star"></i> Top Candidates</h4>
+
+          <div class="candidate-card active" data-id="1">
+            <div class="candidate-info">
+              <div class="candidate-avatar">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah Chen">
+              </div>
+              <div class="candidate-text">
+                <p class="candidate-name">Sarah Chen</p>
+                <span class="candidate-rank">Rank 1</span>
+              </div>
+            </div>
+            <span class="score-badge score-high">92%</span>
+          </div>
+
+          <div class="candidate-card" data-id="2">
+            <div class="candidate-info">
+              <div class="candidate-avatar">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="David Lee">
+              </div>
+              <div class="candidate-text">
+                <p class="candidate-name">David Lee</p>
+                <span class="candidate-rank">Rank 2</span>
+              </div>
+            </div>
+            <span class="score-badge score-high">88%</span>
+          </div>
+
+          <div class="candidate-card" data-id="3">
+            <div class="candidate-info">
+              <div class="candidate-avatar">
+                <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Michael Johnson">
+              </div>
+              <div class="candidate-text">
+                <p class="candidate-name">Michael Johnson</p>
+                <span class="candidate-rank">Rank 3</span>
+              </div>
+            </div>
+            <span class="score-badge score-medium">75%</span>
+          </div>
+
+          <div class="candidate-card" data-id="4">
+            <div class="candidate-info">
+              <div class="candidate-avatar">
+                <img src="https://randomuser.me/api/portraits/women/29.jpg" alt="Emily Adams">
+              </div>
+              <div class="candidate-text">
+                <p class="candidate-name">Emily Adams</p>
+                <span class="candidate-rank">Rank 4</span>
+              </div>
+            </div>
+            <span class="score-badge score-medium">68%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Candidate Detail -->
+      <div class="col-lg-8">
+        <div class="panel candidate-detail">
+          <h2 id="candidate-name">Sarah Chen</h2>
+          <p>Overall Match Score: <span class="score-badge score-high" id="candidate-score">92%</span></p>
+
+          <div class="resume-preview">
+            <iframe id="resume-frame" src="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"></iframe>
+          </div>
+
+          <div class="metric-section">
+            <h4><i class="fa-solid fa-chart-line"></i> Skill Match Overview</h4>
+
+            <p class="metric-title">Python & ML Libraries <span class="float-end metric-value" id="skill1">95%</span></p>
+            <div class="progress mb-3"><div class="progress-bar bg-success" id="bar1" style="width:95%;"></div></div>
+
+            <p class="metric-title">Cloud (AWS / Azure) <span class="float-end metric-value" id="skill2">80%</span></p>
+            <div class="progress mb-3"><div class="progress-bar bg-warning" id="bar2" style="width:80%;"></div></div>
+
+            <p class="metric-title">DevOps / CI-CD <span class="float-end metric-value" id="skill3">65%</span></p>
+            <div class="progress"><div class="progress-bar bg-primary" id="bar3" style="width:65%;"></div></div>
+          </div>
+
+          <div class="metric-section mt-4">
+            <h4><i class="fa-solid fa-lightbulb"></i> Recommendation</h4>
+            <p id="recommendation">Strong recommendation to proceed to interview. Focus interview questions on MLOps production pipeline deployment and troubleshooting high-load scenarios.</p>
+          </div>
+
+          <button class="btn btn-print"><i class="fa-solid fa-print"></i> Print Report</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const candidates = {
+        1: {
+          name: "Sarah Chen",
+          score: "92%",
+          class: "score-high",
+          resume: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+          skills: [95, 80, 65],
+          recommendation: "Strong recommendation to proceed to interview. Focus on MLOps and scalability."
+        },
+        2: {
+          name: "David Lee",
+          score: "88%",
+          class: "score-high",
+          resume: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+          skills: [90, 75, 70],
+          recommendation: "Recommended for final round. Needs deeper cloud deployment experience."
+        },
+        3: {
+          name: "Michael Johnson",
+          score: "75%",
+          class: "score-medium",
+          resume: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+          skills: [70, 65, 60],
+          recommendation: "Good foundation; consider for mid-level engineering role."
+        },
+        4: {
+          name: "Emily Adams",
+          score: "68%",
+          class: "score-medium",
+          resume: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+          skills: [60, 55, 50],
+          recommendation: "Potential fit for training programs or internships."
+        }
+      };
+
+      const cards = document.querySelectorAll(".candidate-card");
+
+      cards.forEach(card => {
+        card.addEventListener("click", function() {
+          document.querySelector(".candidate-card.active")?.classList.remove("active");
+          this.classList.add("active");
+
+          const id = this.getAttribute("data-id");
+          const c = candidates[id];
+
+          document.getElementById("candidate-name").textContent = c.name;
+          const score = document.getElementById("candidate-score");
+          score.textContent = c.score;
+          score.className = `score-badge ${c.class}`;
+          document.getElementById("resume-frame").src = c.resume;
+          document.getElementById("skill1").textContent = `${c.skills[0]}%`;
+          document.getElementById("skill2").textContent = `${c.skills[1]}%`;
+          document.getElementById("skill3").textContent = `${c.skills[2]}%`;
+          document.getElementById("bar1").style.width = `${c.skills[0]}%`;
+          document.getElementById("bar2").style.width = `${c.skills[1]}%`;
+          document.getElementById("bar3").style.width = `${c.skills[2]}%`;
+          document.getElementById("recommendation").textContent = c.recommendation;
+        });
+      });
+    });
+  </script>
+</body>
+</html>

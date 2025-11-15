@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Resume Checker</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(115deg, rgba(0, 35, 65, 0.95), rgba(0, 90, 115, 0.9)), 
+        url('https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1920&q=80')
+        no-repeat center center/cover;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      color: #fff;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1250px;
+      padding: 80px;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    p {
+      font-size: 1.3rem;
+      margin-bottom: 50px;
+      line-height: 1.7;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 35px;
+      width: 100%;
+    }
+
+    .input-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 35px;
+      width: 100%;
+    }
+
+    .upload-box,
+    .text-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+    }
+
+    .file-input {
+      position: relative;
+      width: 100%;
+      height: 150px;
+      border-radius: 16px;
+    }
+
+    .file-input input[type="file"] {
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      position: absolute;
+      z-index: 5;
+    }
+
+    .file-label {
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+      height: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+    }
+
+    .file-label i {
+      font-size: 3rem;
+      color: #48cae4;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 20px;
+      resize: none;
+      font-size: 1.1rem;
+    }
+
+    /* NORMAL SIZE BUTTON */
+    button {
+      background: linear-gradient(135deg, #00b4d8, #0077b6);
+      padding: 14px 40px;
+      border-radius: 14px;
+      font-size: 1.2rem;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #48cae4, #0096c7);
+    }
+
+    /* SCORE CARD (HIDDEN BY DEFAULT) */
+    .score-card {
+      display: none;
+      margin-top: 40px;
+      padding: 35px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.25);
+      border: 1px solid rgba(255,255,255,0.4);
+      backdrop-filter: blur(15px);
+      animation: fadeIn 0.8s ease;
+    }
+
+    /* Show only when Django sends score */
+    .show-score {
+      display: block !important;
+    }
+
+  </style>
+
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+</head>
+
+<body>
+  <div class="container">
+    <h1>Is Your Resume Good Enough?</h1>
+    <p>A free and fast AI Resume Checker performs 16 crucial checks to ensure your resume is interview-ready.</p>
+
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="input-group">
+
+        <div class="upload-box">
+          <label>Upload Your Resume</label>
+
+          <div class="file-input">
+            {{ form.file }}
+
+            <div class="file-label" id="previewBox">
+              {% if files %}
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>{{ files.0.file.name }}</span>
+                <a href="{% url 'view_file' files.0.id %}" target="_blank" style="color:#48cae4;text-decoration:underline;">
+                  View File
+                </a>
+              {% else %}
+                <i class="fa-solid fa-file-arrow-up"></i>
+                <span>Choose File</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="text-box">
+          <label>Paste or Type Job Description</label>
+          <textarea placeholder="Paste or type the job description here..."></textarea>
+        </div>
+
+      </div>
+
+      <!-- ⭐ ANALYZE BUTTON -->
+      <button type="submit" name="analyze">Analyze Resume</button>
+
+    </form>
+
+    <!-- ⭐ SCORE SECTION (VISIBLE ONLY AFTER ANALYSIS) -->
+    <div class="score-card {% if score %}show-score{% endif %}">
+      <h2>Your Resume Score</h2>
+      <h1 style="font-size:3rem; color:#48cae4;">{{ score }}%</h1>
+      <p>Your resume is strong. Improve key ATS metrics to boost your score.</p>
+    </div>
+
+  </div>
+
+  <!-- AUTO UPLOAD + PREVIEW -->
+  <script>
+    const form = document.querySelector("form");
+    const input = document.querySelector('input[type="file"]');
+    const box = document.getElementById("previewBox");
+
+    input.addEventListener("change", () => {
+      if (input.files.length > 0) {
+        let filename = input.files[0].name;
+        box.innerHTML = `
+          <i class="fa-solid fa-file-pdf"></i>
+          <span>${filename}</span>
+          <p style="opacity:0.8;">Uploading...</p>
+        `;
+        form.submit();
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Resume Screener</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap & Font Awesome -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* ---------- Global ---------- */
+    body {
+      margin: 0;
+      font-family: 'Poppins', 'Segoe UI', sans-serif;
+      background: linear-gradient(115deg, rgba(0, 35, 65, 0.92), rgba(0, 90, 115, 0.85)), 
+        url('https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1920&q=80')
+        no-repeat center center/cover;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ---------- Navbar ---------- */
+    .navbar-pro {
+      background: rgba(21, 34, 56, 0.8);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+      padding: 0.8rem 0;
+    }
+
+    .navbar-brand {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #ffffff !important;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .navbar-nav .nav-link {
+      color: rgba(255, 255, 255, 0.9) !important;
+      font-weight: 500;
+      border-radius: 30px;
+      padding: 0.55rem 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff !important;
+    }
+
+    .btn-signup {
+      background: linear-gradient(135deg, #00b4d8, #0077b6);
+      color: #fff !important;
+      border-radius: 30px;
+      font-weight: 600;
+      padding: 0.48rem 1.5rem;
+      margin-left: 0.5rem;
+      box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .btn-signup:hover {
+      background: linear-gradient(135deg, #48cae4, #0096c7);
+      transform: translateY(-2px);
+    }
+
+    /* ---------- Hero Section ---------- */
+    .hero-section {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 1.5rem;
+      position: relative;
+      color: #fff;
+    }
+
+    .hero-content {
+      z-index: 2;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .hero-section h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      line-height: 1.3;
+      text-shadow: 1px 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-section p {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin: 0 auto 2.8rem auto;
+      max-width: 750px;
+      line-height: 1.7;
+    }
+
+    .btn-blue {
+      background: linear-gradient(135deg, #00b4d8, #0077b6);
+      color: #fff;
+      border: none;
+      border-radius: 2rem;
+      font-size: 1.15rem;
+      padding: 0.85rem 2.4rem;
+      font-weight: 600;
+      box-shadow: 0 6px 20px rgba(0, 180, 216, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .btn-blue:hover {
+      background: linear-gradient(135deg, #48cae4, #0096c7);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 180, 216, 0.6);
+    }
+
+    /* ---------- Hero Graphics ---------- */
+    .hero-graphics {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6rem;
+      flex-wrap: wrap;
+      margin-top: 4rem;
+      opacity: 0.95;
+    }
+
+    .hero-graphics img {
+      width: 170px;
+      height: auto;
+      filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+    }
+
+    /* ---------- Features Section ---------- */
+    .features-section {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      padding: 6rem 1rem 5rem 1rem;
+      text-align: center;
+    }
+
+    .features-section h2 {
+      color: #ffffff;
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin-bottom: 3rem;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+      color: #fff;
+      padding: 2.5rem 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: translateY(-8px);
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    .feature-icon {
+      font-size: 2.8rem;
+      color: #48cae4;
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h5 {
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+      color: #fff;
+    }
+
+    .feature-card p {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.6;
+    }
+
+    /* ---------- Footer ---------- */
+    .footer {
+      background: rgba(21, 34, 56, 0.9);
+      color: #dde6f7;
+      font-size: 0.98rem;
+      padding: 1.2rem 0;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 768px) {
+      .hero-section h1 { font-size: 2.4rem; }
+      .hero-section p { font-size: 1.05rem; }
+      .features-section h2 { font-size: 2rem; }
+      .hero-graphics { gap: 3rem; }
+      .hero-graphics img { width: 130px; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-pro fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#"><i class="fa-solid fa-robot"></i> AI Resume Screener</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav align-items-center">
+          <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'signin' %}">Login</a></li>
+          <li class="nav-item"><a class="btn btn-signup" href="{% url 'signup' %}">Sign Up</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section d-flex align-items-center">
+    <div class="container hero-content text-center">
+      <h1>Professional, Fast AI Resume Screening</h1>
+      <p>Analyze, optimize, and shortlist resumes with precision-driven AI tools that help recruiters and candidates save time and improve results.</p>
+      <a href="#features" class="btn btn-blue"><i class="fa-solid fa-cloud-upload"></i> Get Started</a>
+
+      <!-- Hero Graphics: Concept-based illustrations -->
+      <div class="hero-graphics">
+        <img src="https://cdn-icons-png.flaticon.com/512/3176/3176366.png" alt="AI Resume Screening Icon">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Document Analysis Icon">
+        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920339.png" alt="Job Search Icon">
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <h2>Why Choose Our Platform?</h2>
+      <div class="row g-4 justify-content-center">
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-file-lines"></i></div>
+            <h5>Effortless Uploads</h5>
+            <p>Upload resumes in seconds, and let our system instantly process and analyze them with AI precision.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-microchip"></i></div>
+            <h5>AI-Powered Matching</h5>
+            <p>Smart algorithms compare skills and keywords against job descriptions for accurate shortlisting.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <h5>Instant Insights</h5>
+            <p>View analytics and scoring metrics that help you identify top talent or improve your resume instantly.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <small>&copy; 2025 AI Resume Screener. Built for hiring teams by Django & AI.</small>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
