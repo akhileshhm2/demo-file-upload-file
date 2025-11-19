@@ -251,7 +251,7 @@
       <h1>Welcome Back</h1>
       <p>Sign in to access your AI Resume Screener dashboard.</p>
 
-     <form class="signin-form" method="POST">
+     <form class="signin-form" method="POST" action="{% url 'signin' %}">
   {% csrf_token %}
 
   <input type="email" name="email" class="form-control" placeholder="Email address" required>
@@ -274,7 +274,7 @@
   </button>
 
   <div class="signup-link mt-3">
-    Don't have an account? <a href="signup.html">Create one</a>
+    Don't have an account? <a href="{% url 'signup' %}">Create one</a>
   </div>
 </form>
 
